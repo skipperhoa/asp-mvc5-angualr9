@@ -1,0 +1,144 @@
+﻿
+ Đầu tiên để xây dựng được Angular + ASP.NET MVC 5 thì ta cần phải biết chút ít về hai ngôn ngữ này sơ sơ qua cái nhé. Các bạn cũng thấy hiện nay các website đang xây dựng Simple Page Application(SPA) cũng khá là nhiều vì nó giúp ta thao tác mượt mà, nhanh nửa,...
+ Bắt đầu thôi nào, trước hết ta tạo project ASP.NET MVC 5, ở đây mình dùng Visual Studio 2019 nhé.
+
+ * Mở ứng dụng Visual Studio 2019 lên và chọn Create new project và thực hiện như hình sau
+
+ * Sau khi tạo projec xong, bạn tạo cho mình một file HomeController.php như hình sau
+
+ * Tiếp theo ta tạo Index.cshtml khung nhìn cho website, mở file HomeController.php  và click right Index()-> Add View, Sau khi Add View, ta được file Index.cshtml trong thư mục Views/Home/Index.cshtml
+
+ * Nếu trong thư mục App_Start của bạn chưa có BundleConfig.cs thì bạn cần cài đặt để chúng ta cấu hình gọi các thư viện Javascript và Style 
+- Mở Tools->Nutget Package Manager->Package Manager Console và chạy câu lệnh CMD sao
+Install-Package Microsoft.AspNet.Web.Optimization
+- Sau khi chạy xong, vào App_Start-> create file BundleConfig.cs như sau:
+using System.Web;
+using System.Web.Optimization;
+
+namespace WebAngular9mvc5.App_Start
+{
+    public class BundleConfig
+    {
+        public static void RegisterBundles(BundleCollection bundles)
+        {
+        }
+    }
+}
+
+Cách gọi javascript và style như sau: hay đặt đoạn code dưới vào RegisterBundles(BundleCollection bundles)
+           bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
+                      "~/Scripts/bootstrap.js"));
+
+            bundles.Add(new StyleBundle("~/Content/css").Include(
+                      "~/Content/bootstrap.css"));
+
+Bước cuối cùng bạn cần mở file Global.asax.cs và thêm vào hàm Application_Start()
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+using WebAngular9mvc5.App_Start;
+using System.Web.Optimization;
+namespace WebAngular9mvc5
+{
+    public class MvcApplication : System.Web.HttpApplication
+    {
+        protected void Application_Start()
+        {
+            AreaRegistration.RegisterAllAreas();
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+    }
+}
+
+Như vậy là xong, tạm thời ta hãy để đó, tiếp tục ta cần tạo project Angular 9
+Cài đặt Angular 9:
+# npm install -g @angular/cli
+# ng new Angularv9
+Sau khi tôi tạo project xong, tôi dùng Visual Studio Code mở thư mục project lên và chỉnh sửa lại file angular.json lại như sau
+"outputPath": "../WebAngular9mvc5/Bundles",
+Cài đặt chổ mà Angular build ứng dụng ra
+# ng build --prod
+Sau khi chạy câu lệnh trên ta được một thư mục Bundles trong project WebAngular9mv5 của ta có các file mà angular vừa build ra
+Sau khi được các file của angular build ra, ta hay include các file đó vào index.cshtml hoặc file layout.cshtml của Project ASP MVC5
+Đầu tiên mở file BundleConfig.cs trong thư mục App_Start và sửa lại như sau
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Optimization;
+namespace WebAngular9mvc5.App_Start
+{
+    public class BundleConfig
+    {
+        public static void RegisterBundles(BundleCollection bundles)
+        {
+
+            bundles.Add(new ScriptBundle("~/Script/Bundles").Include(
+                      "~/bundles/runtime-es2015.*",
+                       "~/bundles/runtime-es5.*",
+                      "~/bundles/polyfills-es2015.*",
+                       "~/bundles/polyfills-es5.*",
+                      "~/bundles/main-es2015.*",
+                       "~/bundles/main-es5.*"));
+
+            bundles.Add(new StyleBundle("~/Content/Styles").Include(
+                      "~/bundles/style.*"));
+        }
+    }
+}
+
+Tiếp theo mở file Layout.cshtml lên sửa lại thành code dưới đây
+@using System.Web.Optimization;
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="/">
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/Styles")
+</head>
+<body>
+    @RenderBody()
+
+   @Scripts.Render("~/Script/Bundles")
+</body>
+
+</html>
+Cuối cùng là mở file Index.cshtml trong thư mục Views/Home/Index.cshtml sửa lại như sau, ta thêm vào <app-root></app-root> dùng để import các component của angular
+
+<app-root></app-root>
+
+Sau đó ta chạy Project lên thư, nếu bị lỗi, đường dẫn như sau
+main-es2015.1db55c290130c0ad0583.js:1 Error: No base href set. Please provide a value for the APP_BASE_HREF token or add a base element to the document.
+
+Ta hay mở lại Layout.cshtml và thêm <base href="/">
+
+
+----------------------------------------------------
+Visual Studio has added the full set of dependencies for ASP.NET Web API 2 to project 'WebAngular9mvc5'. 
+
+The Global.asax.cs file in the project may require additional changes to enable ASP.NET Web API.
+
+1. Add the following namespace references:
+
+    using System.Web.Http;
+    using System.Web.Routing;
+
+2. If the code does not already define an Application_Start method, add the following method:
+
+    protected void Application_Start()
+    {
+    }
+
+3. Add the following lines to the beginning of the Application_Start method:
+
+    GlobalConfiguration.Configure(WebApiConfig.Register);
+
+
+
